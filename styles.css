@@ -23,6 +23,29 @@ h1, h2, h3 {
     gap: 20px;
 }
 
+.date-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.date-navigation button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.date-navigation button:hover {
+    background-color: #e0e0e0;
+}
+
+.date-navigation h2 {
+    margin: 0;
+}
+
 .game {
     background-color: #fff;
     border: 1px solid #ddd;
@@ -99,10 +122,6 @@ th {
 }
 
 table td:not(:first-child) {
-    text-align: right;
-}
-
-th:not(:first-child) {
     text-align: right;
 }
 
