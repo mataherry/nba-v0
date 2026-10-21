@@ -1,4 +1,4 @@
-const proxyUrl = 'https://careful-fox-81.deno.dev/'
+const proxyUrl = 'https://5ntoro.com/nba-node-js/' //'https://careful-fox-81.deno.dev/'
 const scoresUrl = 'https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json';
 const scheduleUrl = 'https://cdn.nba.com/static/json/staticData/scheduleLeagueV2.json';
 const scoresContainer = document.getElementById('scores');
@@ -10,19 +10,25 @@ async function fetchSchedule() {
     try {
         const response = await fetch(proxyUrl + scheduleUrl);
         const data = await response.json();
-        schedule = data.leagueSchedule.gameDates;
+        schedule = data//.leagueSchedule.gameDates;
+        
+        document.getElementById('prevDate').style.visibility = 'visible';
+        document.getElementById('nextDate').style.visibility = 'visible';
     } catch (error) {
         console.error('Error fetching schedule:', error);
     }
 }
 
 function findGamesByDate(targetDate) {
-    const formattedTargetDate = targetDate.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    }) + " 00:00:00";
-    return schedule.find(gameDate => gameDate.gameDate === formattedTargetDate);
+    const formattedTargetDate = targetDate.toLocaleDateString('en-US')//, {
+    //    year: 'numeric',
+    //    month: '2-digit',
+    //    day: '2-digit'
+    //})// + " 00:00:00";
+    return {
+        games: schedule.filter(gameDate => gameDate.gameDate === formattedTargetDate),
+        gameDate: formattedTargetDate
+    };
 }
 
 function navigateDate(direction) {
@@ -31,9 +37,9 @@ function navigateDate(direction) {
 }
 
 async function fetchScores() {
-    if (!schedule) {
-        await fetchSchedule();
-    }
+    //if (!schedule) {
+    //    await fetchSchedule();
+    //}
 
     let scoreboard;
     const today = new Date();
@@ -78,8 +84,8 @@ function displayScores(scoreboard) {
             ? '<p>No games scheduled for this date.</p>'
             : `<div class="games-container">
                 ${scoreboard.games.map(game => {
-                    const awayWinner = game.gameStatus === 3 && game.awayTeam.score > game.homeTeam.score;
-                    const homeWinner = game.gameStatus === 3 && game.homeTeam.score > game.awayTeam.score;
+                    const awayWinner = game.gameStatusText.startsWith("Final") && game.awayTeam.score > game.homeTeam.score;
+                    const homeWinner = game.gameStatusText.startsWith("Final") && game.homeTeam.score > game.awayTeam.score;
                     return `
                         <div class="game" data-game-id="${game.gameId}">
                             <div class="teams">
@@ -101,6 +107,10 @@ function displayScores(scoreboard) {
 
     document.getElementById('prevDate').addEventListener('click', () => navigateDate(-1));
     document.getElementById('nextDate').addEventListener('click', () => navigateDate(1));
+    if (!schedule) {
+        document.getElementById('prevDate').style.visibility = 'hidden';
+        document.getElementById('nextDate').style.visibility = 'hidden';
+    }
     scoresContainer.addEventListener('click', handleGameClick);
 }
 
@@ -140,6 +150,7 @@ function displayGameDetails(game) {
                 <table>
                     <tr>
                         <th>Player</th>
+                        <th>3s</th>
                         <th>PT</th>
                         <th>RB</th>
                         <th>AS</th>
@@ -167,35 +178,47 @@ function displayGameDetails(game) {
         timeZone: 'America/New_York'
     });
 
-    const isGameFinal = game.gameStatus === 3;
+    const isGameFinal = game.gameStatusText === 'Final';
     const awayWinner = isGameFinal && game.awayTeam.score > game.homeTeam.score;
     const homeWinner = isGameFinal && game.homeTeam.score > game.awayTeam.score;
 
     gameDetailsContainer.innerHTML = `
         <h2>${game.awayTeam.teamTricode} @ ${game.homeTeam.teamTricode}</h2>
-        <p class="game-date">${formattedDate} ET</p>
-        <h3>Team Stats</h3>
+        <p class="game-date" hidden>${formattedDate} ET</p>
+        <h3 hidden>Team Stats</h3>
         <table>
             <tr>
                 <th>Team</th>
                 <th>Points</th>
-                <th>FG%</th>
-                <th>3P%</th>
-                <th>FT%</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>FG</th>
+                <th>3P</th>
+                <th>FT</th>
             </tr>
             <tr class="${awayWinner ? 'winner' : ''}">
                 <td>${game.awayTeam.teamTricode}</td>
                 <td>${game.awayTeam.score}</td>
-                <td>${game.awayTeam.statistics.fieldGoalsPercentage.toFixed(2)}</td>
-                <td>${game.awayTeam.statistics.threePointersPercentage.toFixed(2)}</td>
-                <td>${game.awayTeam.statistics.freeThrowsPercentage.toFixed(2)}</td>
+                <td>${game.awayTeam.periods[0].score}</td>
+                <td>${game.awayTeam.periods[1].score}</td>
+                <td>${game.awayTeam.periods[2].score}</td>
+                <td>${game.awayTeam.periods[3].score}</td>
+                <td>${game.awayTeam.statistics.fieldGoalsPercentage.toFixed(2).toString().replace(/^0\./, '.')}</td>
+                <td>${game.awayTeam.statistics.threePointersPercentage.toFixed(2).toString().replace(/^0\./, '.')}</td>
+                <td>${game.awayTeam.statistics.freeThrowsPercentage.toFixed(2).toString().replace(/^0\./, '.')}</td>
             </tr>
             <tr class="${homeWinner ? 'winner' : ''}">
                 <td>${game.homeTeam.teamTricode}</td>
                 <td>${game.homeTeam.score}</td>
-                <td>${game.homeTeam.statistics.fieldGoalsPercentage.toFixed(2)}</td>
-                <td>${game.homeTeam.statistics.threePointersPercentage.toFixed(2)}</td>
-                <td>${game.homeTeam.statistics.freeThrowsPercentage.toFixed(2)}</td>
+                <td>${game.homeTeam.periods[0].score}</td>
+                <td>${game.homeTeam.periods[1].score}</td>
+                <td>${game.homeTeam.periods[2].score}</td>
+                <td>${game.homeTeam.periods[3].score}</td>
+                <td>${game.homeTeam.statistics.fieldGoalsPercentage.toFixed(2).toString().replace(/^0\./, '.')}</td>
+                <td>${game.homeTeam.statistics.threePointersPercentage.toFixed(2).toString().replace(/^0\./, '.')}</td>
+                <td>${game.homeTeam.statistics.freeThrowsPercentage.toFixed(2).toString().replace(/^0\./, '.')}</td>
             </tr>
         </table>
         <div class="player-stats">
@@ -228,6 +251,7 @@ function createPlayerRow(player, isActive) {
     return `
         <tr>
             <td style="${cellStyle}">${player.name}</td>
+            <td>${stats.threePointersMade}</td>
             <td>${stats.points}</td>
             <td>${stats.reboundsTotal}</td>
             <td>${stats.assists}</td>
@@ -258,4 +282,5 @@ function handleDetailClick(event) {
     }
 }
 
-fetchSchedule().then(() => fetchScores());
+fetchScores().then(() => fetchSchedule());
+

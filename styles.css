@@ -9,7 +9,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
 }
 
 h1, h2, h3 {
@@ -93,7 +93,7 @@ h1, h2, h3 {
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 20px;
+    padding: 5px;
     margin-top: 20px;
     overflow-x: auto;
 }
@@ -113,7 +113,7 @@ table {
 
 th, td {
     text-align: left;
-    padding: 8px;
+    padding: 4px;
     border-bottom: 1px solid #ddd;
 }
 
@@ -122,6 +122,10 @@ th {
 }
 
 table td:not(:first-child) {
+    text-align: right;
+}
+
+th:not(:first-child) {
     text-align: right;
 }
 
